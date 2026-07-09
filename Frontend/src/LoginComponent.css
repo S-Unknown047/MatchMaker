@@ -1,0 +1,249 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-color: #FAF9F6;
+  --card-bg: #ffffff;
+  --text-primary: #1e1e20;
+  --text-secondary: #6e6e73;
+  --accent-color: #121212;
+  --accent-hover: #2c2c2e;
+  --border-color: #eae6e1;
+  --input-focus: #121212;
+  --shadow-sm: 0 2px 8px rgba(18, 18, 18, 0.04);
+  --shadow-md: 0 12px 32px rgba(18, 18, 18, 0.06);
+  --border-radius: 12px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.login-page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  background-image:
+    radial-gradient(rgba(18, 18, 18, 0.03) 1px, transparent 0),
+    radial-gradient(rgba(18, 18, 18, 0.03) 1px, transparent 0);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+.login-page-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.15;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  padding: 40px 32px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  animation: cardFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brand-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(18, 18, 18, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-logo::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  top: 0;
+  left: 0;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.auth-header p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.mui-input-field {
+  margin-bottom: 20px !important;
+}
+
+.mui-input-field .MuiOutlinedInput-root {
+  border-radius: 8px !important;
+  background-color: #fafafa;
+  transition: all 0.2s ease-in-out;
+}
+
+.mui-input-field .MuiOutlinedInput-root:hover {
+  background-color: #f5f5f5;
+}
+
+.mui-input-field .MuiOutlinedInput-root.Mui-focused {
+  background-color: #ffffff;
+}
+
+.mui-input-field .MuiOutlinedInput-notchedOutline {
+  border-color: var(--border-color) !important;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.mui-input-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--input-focus) !important;
+  border-width: 1.5px !important;
+}
+
+.mui-input-field .MuiInputLabel-root {
+  color: var(--text-secondary) !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 14px !important;
+}
+
+.mui-input-field .MuiInputLabel-root.Mui-focused {
+  color: var(--text-primary) !important;
+}
+
+.submit-btn {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  margin-top: 10px !important;
+  width: 100% !important;
+}
+
+.submit-btn:hover {
+  background-color: var(--accent-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(18, 18, 18, 0.1) !important;
+}
+
+.submit-btn:active {
+  transform: translateY(1px);
+}
+
+.form-footer-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  font-size: 13px;
+}
+
+.form-footer-options a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.form-footer-options a:hover {
+  color: var(--text-primary);
+}
+
+.divider-container {
+  margin: 24px 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.divider-container::before,
+.divider-container::after {
+  border-color: var(--border-color) !important;
+}
+
+.social-buttons-container {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.social-btn {
+  flex: 1;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  background-color: #ffffff !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.social-btn:hover {
+  background-color: #faf9f6 !important;
+  border-color: #d1cbc4 !important;
+}

@@ -1,10 +1,9 @@
 import { useState } from 'react'
+import LoginComponent from './LoginComponent.jsx'
 
 function App() {
   return (
-      <>
-        <h1>This is initial setup</h1>
-      </>
+    <LoginComponent />
   )
 }
 
