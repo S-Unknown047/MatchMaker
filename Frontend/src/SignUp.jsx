@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "./api/axios";
-import { useEffect } from "react";
 import {
     Box,
     TextField,
@@ -11,71 +10,102 @@ import {
 } from "@mui/material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./LoginComponent.css";
 
+const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 
-// const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
-// const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-
-
-export default function LoginComponent() {
+export default function SignUp() {
     const [gmail, changeGmail] = useState("");
-    const [validGmail, setValidName] = useState(false);
+    const [validGmail, setValidGmail] = useState(false);
     const [password, changePassword] = useState("");
-    // const [validPwd, setValidPwd] = useState(false);
+    const [confirmPassword, changeConfirmPassword] = useState("");
+    const [validPwd, validatePwdSate] = useState(true)
     const [type, changeType] = useState("password");
+    const [confirmType, changeConfirmType] = useState("password");
     const [Error, changeError] = useState("");
+    const [Success, changeSuccess] = useState("");
+    const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const handleSignUp = (e) => {
         if (e) e.preventDefault();
         changeError("");
-        axios.post('/login', {
+        changeSuccess("");
+
+        if (!validGmail) {
+            changeError("Please enter a valid Gmail address");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            changeError("Passwords do not match");
+            return;
+        }
+
+        axios.post('/signup', {
             "gmail": gmail,
             "password": password
         })
             .then((response) => {
                 if (response.data.status === "error") {
                     changeError(response.data.message);
+                } else {
+                    changeSuccess("Account created successfully! Redirecting to login...");
+                    setTimeout(() => {
+                        navigate("/");
+                    }, 2000);
                 }
             })
             .catch((error) => {
                 console.error(error);
-                changeError("Something went wrong. Please try again later.");
+                changeError(error.response?.data?.message || "Something went wrong. Please try again later.");
             });
     }
 
     useEffect(() => {
-        setValidName(gmail.endsWith("@gmail.com"));
-        if (gmail != "" && !validGmail) {
+        changeError("");
+        const isValid = gmail.endsWith("@gmail.com");
+        setValidGmail(isValid);
+        if (gmail !== "" && !isValid) {
             changeError("Please enter a valid Gmail address");
         } else {
             changeError("");
         }
     }, [gmail]);
-    // useEffect(() => {
-    //     setValidPwd(PWD_REGEX.test(password));
-    // }, [password]);
+
+    useEffect(() => {
+        const isValid = PWD_REGEX.test(password);
+
+        validatePwdSate(isValid);
+
+        if (!isValid) {
+            changeError(
+                "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+            );
+        }
+    }, [password, confirmPassword])
 
     const changeFieldType = (e) => {
         e.preventDefault();
         changeType((prev) => prev === "password" ? "text" : "password");
     }
 
+    const changeConfirmFieldType = (e) => {
+        e.preventDefault();
+        changeConfirmType((prev) => prev === "password" ? "text" : "password");
+    }
+
     return (
         <div className="login-page-wrapper">
             <div className="auth-card">
-
                 <div className="brand-logo-container">
                     <div className="brand-logo">S</div>
                 </div>
 
-
                 <div className="auth-header">
-                    <h1>Welcome back</h1>
-                    <p>Please enter your details to sign in</p>
+                    <h1>Create an account</h1>
+                    <p>Enter your details to get started</p>
                 </div>
-
 
                 {Error && (
                     <Box sx={{ mb: 2.5 }}>
@@ -85,11 +115,18 @@ export default function LoginComponent() {
                     </Box>
                 )}
 
+                {Success && (
+                    <Box sx={{ mb: 2.5 }}>
+                        <Alert severity="success" variant="outlined" sx={{ borderRadius: '8px', fontSize: '13px' }}>
+                            {Success}
+                        </Alert>
+                    </Box>
+                )}
 
-                <form onSubmit={handleLogin}>
+                <form onSubmit={handleSignUp}>
                     <TextField
                         fullWidth
-                        type="gmail"
+                        type="email"
                         label="Email Address"
                         placeholder="Enter Your Gmail"
                         value={gmail}
@@ -127,11 +164,49 @@ export default function LoginComponent() {
                                             onClick={changeFieldType}
                                             onMouseDown={(e) => e.preventDefault()}
                                             edge="end"
-                                            id="btn"
+                                            id="pwd-btn"
                                             aria-label="toggle password visibility"
                                             sx={{ color: "var(--text-secondary)" }}
                                         >
                                             {type === "password" ? (
+                                                <VisibilityIcon />
+                                            ) : (
+                                                <VisibilityOffIcon />
+                                            )}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }
+                        }}
+                    />
+
+                    <TextField
+                        fullWidth
+                        type={confirmType}
+                        label="Confirm Password"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => changeConfirmPassword(e.target.value)}
+                        required
+                        variant="outlined"
+                        className="mui-input-field"
+                        slotProps={{
+                            htmlInput: {
+                                id: "confirmPassword",
+                                name: "confirmPassword",
+                            },
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            onClick={changeConfirmFieldType}
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            edge="end"
+                                            id="confirm-pwd-btn"
+                                            aria-label="toggle confirm password visibility"
+                                            sx={{ color: "var(--text-secondary)" }}
+                                        >
+                                            {confirmType === "password" ? (
                                                 <VisibilityIcon />
                                             ) : (
                                                 <VisibilityOffIcon />
@@ -149,11 +224,10 @@ export default function LoginComponent() {
                         disableElevation
                         className="submit-btn"
                     >
-                        Login
+                        Sign Up
                     </Button>
 
-                    <p>If don't have an account <Link to="/SignUp">Signup</Link></p>
-
+                    <p>Already have an account? <Link to="/">Login</Link></p>
                 </form>
             </div>
         </div>
