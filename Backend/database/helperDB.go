@@ -21,7 +21,8 @@ func GetUser(Email string) (model.User, error) {
 		&data.Email,
 		&data.Password,
 		&data.CreatedAt,
-		&data.UpdatedAt)
+		&data.UpdatedAt,
+		&data.RefreshToken)
 
 	if err != nil {
 		return data, err
@@ -48,13 +49,14 @@ func SetRefreshToken(refreshToken string, user *model.User) error {
 }
 
 func GetRefreshToken(refreshToken string) (model.User, error) {
-	query := `SELECT * FROM users WHERE refresh_token = $1`
+	query := `SELECT email, password, created_at, updated_at, refresh_token FROM users WHERE refresh_token = $1`
 	var data model.User
 	if err := Conn.QueryRow(Ctx, query, refreshToken).Scan(
 		&data.Email,
 		&data.Password,
 		&data.CreatedAt,
-		&data.UpdatedAt); err != nil {
+		&data.UpdatedAt,
+		&data.RefreshToken); err != nil {
 		return data, err
 	}
 	return data, nil

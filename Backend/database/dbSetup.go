@@ -15,10 +15,10 @@ var Ctx = context.Background()
 func Setup() {
 	URL := os.Getenv("DATABASE_URL")
 	fmt.Println(URL)
-	Conn, err := pgx.Connect(Ctx, URL)
+	var err error
+	Conn, err = pgx.Connect(Ctx, URL)
 
 	if err != nil {
-		Conn.Close(Ctx)
 		log.Fatal(err)
 	}
 

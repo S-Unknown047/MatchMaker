@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	db "matchMaker/database"
 	"matchMaker/model"
 	"net/http"
@@ -16,22 +17,26 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var user model.ReceivedLoginReq
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		json.NewEncoder(w).Encode(map[string]string{"message": err.Error()})
 		return
 	}
 
+	fmt.Println((user))
 	data, err := db.GetUser(user.Email)
 
 	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Bad Request"))
+		json.NewEncoder(w).Encode(map[string]string{"message": "Invalid email or password"})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(user.Password)); err != nil {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Bad Request"))
+		json.NewEncoder(w).Encode(map[string]string{"message": "Invalid email or password"})
 		return
 	}
 
@@ -46,7 +51,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 		"iat":   time.Now().Unix(),
 	})
-	var jwtSecret = []byte(os.Getenv("REFRESH_SECRET"))
+	var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 	refreshTokenString, err := refreshToken.SignedString(jwtSecret)
 
 	if err != nil {
@@ -69,8 +74,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
 	cookie := &http.Cookie{
 		Name:     "authorization",
 		Value:    refreshTokenString,
@@ -81,6 +84,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, cookie)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"accessToken": acessTokenKey,
 	})

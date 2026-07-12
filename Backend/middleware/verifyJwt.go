@@ -15,6 +15,10 @@ func JwtVerify(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		AuthToken := r.Header.Get("authorization")
 
+		if len(AuthToken) > 7 && AuthToken[:7] == "Bearer " {
+			AuthToken = AuthToken[7:]
+		}
+
 		if AuthToken == "" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
@@ -40,10 +44,12 @@ func JwtVerify(next http.Handler) http.Handler {
 			json.NewEncoder(w).Encode(map[string]string{
 				"error": "Unauthorized",
 			})
+			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 
-			if time.Now().Unix() > claims["exp"].(int64) {
+			expClaim, ok := claims["exp"].(float64)
+			if !ok || time.Now().Unix() > int64(expClaim) {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
 				json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})

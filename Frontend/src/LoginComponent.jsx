@@ -1,6 +1,8 @@
 import { useState } from "react";
 import axios from "./api/axios";
 import { useEffect } from "react";
+import useAuth from "./useAuth.jsx"
+import {useNavigate, useLocation} from "react-router-dom";
 import {
     Box,
     TextField,
@@ -19,6 +21,7 @@ import "./LoginComponent.css";
 
 
 export default function LoginComponent() {
+    const {setAuth} = useAuth()
     const [gmail, changeGmail] = useState("");
     const [validGmail, setValidName] = useState(false);
     const [password, changePassword] = useState("");
@@ -26,16 +29,28 @@ export default function LoginComponent() {
     const [type, changeType] = useState("password");
     const [Error, changeError] = useState("");
 
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/home";
+
     const handleLogin = (e) => {
         if (e) e.preventDefault();
         changeError("");
         axios.post('/login', {
-            "gmail": gmail,
+            "email": gmail,
             "password": password
         })
             .then((response) => {
-                if (response.data.status === "error") {
-                    changeError(response.data.message);
+                console.log(JSON.stringify(response.data))
+                let accessToken = response?.data?.accessToken;
+
+                if (response.status !== 200) {
+                    changeError(response.data?.message || "Something went wrong.");
+                } else {
+                    setAuth({gmail, password, accessToken});
+                    changeGmail('')
+                    changePassword('')
+                    navigate(from, {replace:true})
                 }
             })
             .catch((error) => {

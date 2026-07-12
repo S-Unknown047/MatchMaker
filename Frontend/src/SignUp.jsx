@@ -43,18 +43,21 @@ export default function SignUp() {
         }
 
         axios.post('/signup', JSON.stringify({
-            "gmail": gmail,
+            "email": gmail,
             "password": password
         }), { headers: { 'Content-Type': 'application/json' }, withCredentials: true })
             .then((response) => {
                 if (response.data.status === "error") {
                     changeError(response.data.message);
-
                 } else {
                     changeSuccess(true);
+
                     setTimeout(() => {
                         navigate("/login");
                     }, 1000);
+                    changeGmail('')
+                    changePassword('')
+                    changeConfirmPassword('')
                 }
             })
             .catch((error) => {
@@ -76,13 +79,17 @@ export default function SignUp() {
 
     useEffect(() => {
         const isValid = PWD_REGEX.test(password);
-
+        changeError("")
         validatePwdSate(isValid);
 
         if (password !== "" && !isValid) {
             changeError(
                 "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character"
             );
+        }
+
+        if (confirmPassword !== "" && confirmPassword !== password) {
+            changeError("Passwords do not match");
         }
     }, [password, confirmPassword])
 
@@ -225,7 +232,6 @@ export default function SignUp() {
                             >
                                 Sign Up
                             </Button>
-
                             <p>Already have an account? <Link to="/login">Login</Link></p>
                         </form>
                     </div>

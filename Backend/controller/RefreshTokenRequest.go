@@ -47,14 +47,15 @@ func HndelRefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		// expiry check
-		if claims["email"] != user {
+		if claims["email"] != user.Email {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
 			return
 		}
 
-		if time.Now().Unix() > claims["exp"].(int64) {
+		expClaim, ok := claims["exp"].(float64)
+		if !ok || time.Now().Unix() > int64(expClaim) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
@@ -64,11 +65,11 @@ func HndelRefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	acess := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": user.Email,
-		"exp":   time.Now().Add(60 * 15).Unix(),
+		"exp":   time.Now().Add(time.Minute * 15).Unix(),
 		"iat":   time.Now().Unix(),
 	})
 
-	accessToken, err := acess.SignedString(sercretKey)
+	accessToken, err := acess.SignedString([]byte(sercretKey))
 
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
@@ -80,6 +81,6 @@ func HndelRefreshToken(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
-		"acessToken": accessToken,
+		"accessToken": accessToken,
 	})
 }
