@@ -117,9 +117,16 @@ func GetGames(page string) []byte {
 }
 
 func SearchGame(gameName string) []byte {
+	if data.AccessToken == "" || (data.TokenExpiry) < time.Now().Unix() {
+		if err := TwitchAuth(); err != nil {
+			fmt.Println("Error in TwitchAuth:", err)
+			return nil
+		}
+	}
+
 	url := "https://api.igdb.com/v4/games"
 
-	body := "fields name, cover.url;" + "search " + gameName + ";" + "limit 5"
+	body := `fields name, cover.url; search "` + gameName + `"; limit 5;`
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(body)))
 
@@ -127,6 +134,12 @@ func SearchGame(gameName string) []byte {
 		fmt.Println(err)
 		return nil
 	}
+
+	clientID := os.Getenv("TWITCH_CLIENT_ID")
+	acessToken := data.AccessToken
+	req.Header.Add("Client-ID", clientID)
+	req.Header.Add("Authorization", "Bearer "+acessToken)
+
 	client := &http.Client{Timeout: time.Second * 5}
 
 	res, err := client.Do(req)
@@ -135,9 +148,11 @@ func SearchGame(gameName string) []byte {
 		fmt.Println(err)
 		return nil
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		fmt.Printf("error ")
+		resBody, _ := io.ReadAll(res.Body)
+		fmt.Printf("error: IGDB API returned status %s: %s\n", res.Status, string(resBody))
 		return nil
 	}
 
@@ -152,6 +167,13 @@ func SearchGame(gameName string) []byte {
 }
 
 func GetGameByID(gameId string) []byte {
+	if data.AccessToken == "" || (data.TokenExpiry) < time.Now().Unix() {
+		if err := TwitchAuth(); err != nil {
+			fmt.Println("Error in TwitchAuth:", err)
+			return nil
+		}
+	}
+
 	url := "https://api.igdb.com/v4/games/"
 	body := "fields name, summary, rating, cover.url; where id =" + gameId + ";"
 
@@ -162,16 +184,23 @@ func GetGameByID(gameId string) []byte {
 		return nil
 	}
 
+	clientID := os.Getenv("TWITCH_CLIENT_ID")
+	acessToken := data.AccessToken
+	req.Header.Add("Client-ID", clientID)
+	req.Header.Add("Authorization", "Bearer "+acessToken)
+
 	client := &http.Client{Timeout: time.Second * 5}
 
 	res, err := client.Do(req)
 
 	if err != nil {
 		fmt.Println(err)
+		return nil
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		fmt.Printf("error ")
+		resBody, _ := io.ReadAll(res.Body)
+		fmt.Printf("error: IGDB API returned status %s: %s\n", res.Status, string(resBody))
 		return nil
 	}
 

@@ -12,14 +12,21 @@ type game struct {
 
 func SearchGame(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var g game
-	if err := json.NewDecoder(r.Body).Decode(&g); err != nil {
+
+	gameName := r.URL.Query().Get("game")
+
+	if gameName == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		json.NewEncoder(w).Encode(map[string]string{"error": "gameName parameter is required"})
 		return
 	}
 
-	res := middleware.SearchGame(g.GameName)
+	res := middleware.SearchGame(gameName)
+	if res == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "failed to search games"})
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
