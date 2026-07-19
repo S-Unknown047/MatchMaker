@@ -38,6 +38,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		Password:  string(hashedpass),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+		Roles:     []string{"user"},
 	}
 
 	if err := db.AddUser(dbData); err != nil {

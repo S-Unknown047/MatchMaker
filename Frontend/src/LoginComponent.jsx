@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "./api/axios";
 import { useEffect } from "react";
 import useAuth from "./useAuth.jsx"
-import {useNavigate, useLocation} from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
     Box,
     TextField,
@@ -15,13 +15,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Link } from "react-router-dom";
 import "./LoginComponent.css";
-
-
 // const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 
 
 export default function LoginComponent() {
-    const {setAuth} = useAuth()
+    const { auth, setAuth } = useAuth()
     const [gmail, changeGmail] = useState("");
     const [validGmail, setValidName] = useState(false);
     const [password, changePassword] = useState("");
@@ -33,6 +31,13 @@ export default function LoginComponent() {
     const location = useLocation();
     const from = location.state?.from?.pathname || "/home";
 
+    useEffect(() => {
+        if (auth?.accessToken) {
+            navigate("/home", { replace: true });
+        }
+    }, [auth?.accessToken, navigate]);
+
+
     const handleLogin = (e) => {
         if (e) e.preventDefault();
         changeError("");
@@ -43,14 +48,15 @@ export default function LoginComponent() {
             .then((response) => {
                 console.log(JSON.stringify(response.data))
                 let accessToken = response?.data?.accessToken;
+                let roles = response?.data?.roles;
 
                 if (response.status !== 200) {
                     changeError(response.data?.message || "Something went wrong.");
                 } else {
-                    setAuth({gmail, password, accessToken});
+                    setAuth({ gmail, password, roles, accessToken });
                     changeGmail('')
                     changePassword('')
-                    navigate(from, {replace:true})
+                    navigate(from, { replace: true })
                 }
             })
             .catch((error) => {

@@ -126,7 +126,7 @@ func SearchGame(gameName string) []byte {
 
 	url := "https://api.igdb.com/v4/games"
 
-	body := `fields name, cover.url; search "` + gameName + `"; limit 5;`
+	body := `fields name, cover.url; search "` + gameName + `"; limit 10;`
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(body)))
 

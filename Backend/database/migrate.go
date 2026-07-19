@@ -12,7 +12,8 @@ func CreateTable() {
     password TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    refresh_token TEXT DEFAULT ''
+    refresh_token TEXT DEFAULT '',
+	roles TEXT[] DEFAULT '{user}'
 );`
 	fmt.Println("Database table created")
 

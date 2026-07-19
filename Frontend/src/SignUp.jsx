@@ -12,10 +12,12 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Link, useNavigate } from "react-router-dom";
 import "./LoginComponent.css";
+import useAuth from "./useAuth.jsx";
 
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 
 export default function SignUp() {
+    const { auth } = useAuth();
     const [gmail, changeGmail] = useState("");
     const [validGmail, setValidGmail] = useState(false);
     const [password, changePassword] = useState("");
@@ -26,6 +28,12 @@ export default function SignUp() {
     const [Error, changeError] = useState("");
     const [Success, changeSuccess] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (auth?.accessToken) {
+            navigate("/home", { replace: true });
+        }
+    }, [auth?.accessToken, navigate]);
 
     const handleSignUp = (e) => {
         if (e) e.preventDefault();

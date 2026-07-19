@@ -8,6 +8,7 @@ type User struct {
 	CreatedAt    time.Time `json:created_at`
 	UpdatedAt    time.Time `json:updated_at`
 	RefreshToken string    `json:"refresh_token"`
+	Roles        []string  `json:"roles"`
 }
 
 type ReceivedSignupReq struct {

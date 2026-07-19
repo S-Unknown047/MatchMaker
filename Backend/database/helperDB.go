@@ -6,8 +6,8 @@ import (
 )
 
 func AddUser(user model.User) error {
-	query := `INSERT INTO users (email, password, created_at, updated_at) VALUES ($1, $2, $3, $4)`
-	if _, err := Conn.Exec(Ctx, query, user.Email, user.Password, user.CreatedAt, user.UpdatedAt); err != nil {
+	query := `INSERT INTO users (email, password, created_at, updated_at, roles) VALUES ($1, $2, $3, $4, $5)`
+	if _, err := Conn.Exec(Ctx, query, user.Email, user.Password, user.CreatedAt, user.UpdatedAt, user.Roles); err != nil {
 		return err
 	}
 
@@ -22,7 +22,8 @@ func GetUser(Email string) (model.User, error) {
 		&data.Password,
 		&data.CreatedAt,
 		&data.UpdatedAt,
-		&data.RefreshToken)
+		&data.RefreshToken,
+		&data.Roles)
 
 	if err != nil {
 		return data, err

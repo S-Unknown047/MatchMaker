@@ -14,6 +14,7 @@ func init() {
 	godotenv.Load()
 	db.Setup()
 }
+
 func main() {
 	server := http.NewServeMux()
 	Port := os.Getenv("PORT")
