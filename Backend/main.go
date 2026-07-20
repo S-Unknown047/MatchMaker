@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"matchMaker/controller"
 	db "matchMaker/database"
+	"matchMaker/middleware"
 	"net/http"
 	"os"
 
@@ -13,6 +14,7 @@ import (
 func init() {
 	godotenv.Load()
 	db.Setup()
+	middleware.CreateInstance()
 }
 
 func main() {
