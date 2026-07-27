@@ -1,4 +1,4 @@
-import {useContext, useDebugValue} from "react";
+import { useContext, useDebugValue } from "react";
 import AuthContext from "./AuthPorvider.jsx"
 const useAuth = () => {
     const { auth } = useContext(AuthContext)

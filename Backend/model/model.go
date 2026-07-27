@@ -22,6 +22,7 @@ type ReceivedLoginReq struct {
 }
 
 type UserProfile struct {
+	Email             string    `json:"email"`
 	UserName          string    `json:"user_name"`
 	Age               int       `json:"age"`
 	Gender            string    `json:"gender"`

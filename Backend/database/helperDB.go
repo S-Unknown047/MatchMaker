@@ -67,8 +67,8 @@ func GetRefreshToken(refreshToken string) (model.User, error) {
 }
 
 func SetUserData(data *model.UserProfile) error {
-	query := `INSERT INTO user_info (user_name, age, gender, level, profile_picture_url, profile_picture_id, playing_style, games, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
-	if _, err := Conn.Exec(Ctx, query, data.UserName, data.Age, data.Gender, data.Level, data.ProfilePictureUrl, data.ProfilePictureId, data.PlayingStyle, data.Games, data.CreatedAt, data.UpdatedAt); err != nil {
+	query := `INSERT INTO user_info (email, user_name, age, gender, level, profile_picture_url, profile_picture_id, playing_style, games, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
+	if _, err := Conn.Exec(Ctx, query, data.Email, data.UserName, data.Age, data.Gender, data.Level, data.ProfilePictureUrl, data.ProfilePictureId, data.PlayingStyle, data.Games, data.CreatedAt, data.UpdatedAt); err != nil {
 		return err
 	}
 	return nil
@@ -78,6 +78,7 @@ func GetUserData(userName string) (model.UserProfile, error) {
 	query := `SELECT * FROM user_info WHERE user_name = $1`
 	var user model.UserProfile
 	if err := Conn.QueryRow(Ctx, query, userName).Scan(
+		&user.Email,
 		&user.UserName,
 		&user.Age,
 		&user.Gender,

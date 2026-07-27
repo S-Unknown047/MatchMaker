@@ -54,9 +54,10 @@ export default function LoginComponent() {
                     changeError(response.data?.message || "Something went wrong.");
                 } else {
                     setAuth({ gmail, password, roles, accessToken });
-                    changeGmail('')
-                    changePassword('')
-                    navigate(from, { replace: true })
+                    changeGmail('');
+                    changePassword('');
+                    const targetPath = location.state?.isNewUser ? "/setup-profile" : from;
+                    navigate(targetPath, { replace: true });
                 }
             })
             .catch((error) => {

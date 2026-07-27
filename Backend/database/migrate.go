@@ -18,13 +18,13 @@ func CreateTable() {
 
 	userInfoTable := `CREATE TABLE IF NOT EXISTS user_info (
 	email TEXT PRIMARY KEY,
-	user_name CITEXT UNIQUE NOT NULL,
+	user_name TEXT UNIQUE NOT NULL,
 	age INT,
 	gender TEXT,
 	level INT,
 	profile_picture_url TEXT,
 	profile_picture_id TEXT,
-	playing_style TEXT[] DEFAULT '{}',                                                                  TEXT[] DEFAULT '{}',
+	playing_style TEXT[] DEFAULT '{}',                                                               
 	games TEXT[] DEFAULT '{}',
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

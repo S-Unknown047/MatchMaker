@@ -61,7 +61,7 @@ export default function SignUp() {
                     changeSuccess(true);
 
                     setTimeout(() => {
-                        navigate("/login");
+                        navigate("/login", { state: { isNewUser: true } });
                     }, 1000);
                     changeGmail('')
                     changePassword('')

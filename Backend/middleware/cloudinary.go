@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -25,7 +26,7 @@ func CreateInstance() {
 }
 
 func UploadImage(file []byte) (string, string) {
-	uploadResult, err := cld.Upload.Upload(context.Background(), file, uploader.UploadParams{
+	uploadResult, err := cld.Upload.Upload(context.Background(), bytes.NewReader(file), uploader.UploadParams{
 		ResourceType: "image",
 		Folder:       "matchmaker",
 	})
@@ -34,6 +35,8 @@ func UploadImage(file []byte) (string, string) {
 		fmt.Println(err)
 		return "", ""
 	}
+
+	fmt.Printf("in uppload image %s %s", uploadResult.PublicID, uploadResult.SecureURL)
 
 	return uploadResult.PublicID, uploadResult.SecureURL
 }

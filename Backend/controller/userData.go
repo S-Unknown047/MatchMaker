@@ -12,6 +12,7 @@ import (
 )
 
 type reqUserData struct {
+	Email         string   `json:"email"`
 	UserName      string   `json:"user_name"`
 	Age           int      `json:"age"`
 	Gender        string   `json:"gender"`
@@ -33,9 +34,16 @@ func SetUserData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ProfileId, secureURL := middleware.UploadImage(data.ProfilePiture)
+	var ProfileId, secureURL string
+	fmt.Println(data.ProfilePiture)
+	if len(data.ProfilePiture) > 0 {
+		ProfileId, secureURL = middleware.UploadImage(data.ProfilePiture)
+	}
+
+	fmt.Printf("profile id %s profile url %s", ProfileId, secureURL)
 
 	SendData := &model.UserProfile{
+		Email:             data.Email,
 		UserName:          data.UserName,
 		Age:               data.Age,
 		Gender:            data.Gender,
@@ -47,6 +55,8 @@ func SetUserData(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 	}
+
+	fmt.Println("Email " + string(SendData.Email))
 
 	err := db.SetUserData(SendData)
 
@@ -68,6 +78,9 @@ func SetUserData(w http.ResponseWriter, r *http.Request) {
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	userName := r.URL.Query().Get("userName")
+	if userName == "" {
+		userName = r.URL.Query().Get("username")
+	}
 
 	if !userNameRegex.MatchString(userName) {
 		w.WriteHeader(http.StatusBadRequest)
@@ -83,6 +96,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{
 			"error": "Internal Server Error",
 		})
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -93,7 +107,10 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func CheckUniqueUserName(w http.ResponseWriter, r *http.Request) {
-	username := r.URL.Query().Get("username")
+	username := r.PathValue("name")
+	if username == "" {
+		username = r.URL.Query().Get("username")
+	}
 
 	if !userNameRegex.MatchString(username) {
 		w.WriteHeader(http.StatusBadRequest)
@@ -103,11 +120,19 @@ func CheckUniqueUserName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := db.CheckUsername(username); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{
-			"error": err.Error(),
-		})
+	err := db.CheckUsername(username)
+	if err != nil {
+		if err.Error() == "Username already exists" {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "Username already exists",
+			})
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "Internal server error",
+			})
+		}
 		return
 	}
 
