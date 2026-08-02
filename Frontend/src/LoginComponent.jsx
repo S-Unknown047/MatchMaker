@@ -49,11 +49,12 @@ export default function LoginComponent() {
                 console.log(JSON.stringify(response.data))
                 let accessToken = response?.data?.accessToken;
                 let roles = response?.data?.roles;
+                let isProfileExist = response.data.profile;
 
                 if (response.status !== 200) {
                     changeError(response.data?.message || "Something went wrong.");
                 } else {
-                    setAuth({ gmail, password, roles, accessToken });
+                    setAuth({ gmail, password, roles, accessToken, isProfileExist });
                     changeGmail('');
                     changePassword('');
                     const targetPath = location.state?.isNewUser ? "/setup-profile" : from;

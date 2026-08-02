@@ -6,6 +6,7 @@ import HomePage from "./HomePage.jsx";
 import RequireAuth from "./RequireAuth.jsx";
 import Unauthorized from "./Unauthorized.jsx";
 import UserInfo from "./UseField.jsx";
+import Profile from "./profilePage.jsx";
 
 const Roles = {
   'User': 'user',
@@ -22,7 +23,7 @@ function App() {
       <Route element={<RequireAuth allowedRoles={[Roles['User']]} />}>
         <Route path="/home" element={<HomePage />} />
         <Route path="/setup-profile" element={<UserInfo />} />
-        <Route path="/profile" element={<UserInfo />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

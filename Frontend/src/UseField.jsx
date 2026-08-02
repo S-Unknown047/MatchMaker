@@ -35,7 +35,7 @@ const POPULAR_GAMES = [
 export default function UserInfo() {
     const axiosPrivate = useAxiosPrivate();
     const navigate = useNavigate();
-    const { auth } = useAuth()
+    const { auth, setAuth } = useAuth()
 
     const [username, setUserName] = useState("");
     const [nameError, setNameError] = useState("");
@@ -189,6 +189,7 @@ export default function UserInfo() {
             const response = await axiosPrivate.post("/upload", payload);
 
             if (response.status === 200 || response.data?.error === "ok") {
+                setAuth(prev => ({ ...prev, username: username.trim() }))
                 setSuccess("Profile setup complete! Redirecting to dashboard...");
                 setTimeout(() => {
                     navigate("/home");

@@ -34,3 +34,9 @@ type UserProfile struct {
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 }
+
+type MsgType struct {
+	To      string    `json:"to"`
+	Message string    `json:"message"`
+	Created time.Time `json:"created"`
+}

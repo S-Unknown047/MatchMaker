@@ -77,10 +77,8 @@ func SetUserData(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
-	userName := r.URL.Query().Get("userName")
-	if userName == "" {
-		userName = r.URL.Query().Get("username")
-	}
+
+	userName := r.PathValue("username")
 
 	if !userNameRegex.MatchString(userName) {
 		w.WriteHeader(http.StatusBadRequest)

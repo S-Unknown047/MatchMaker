@@ -21,7 +21,7 @@ func main() {
 	server := http.NewServeMux()
 	Port := os.Getenv("PORT")
 	fmt.Println(Port)
-
+	server.HandleFunc("/ws")
 	server.HandleFunc("POST /login", controller.Login)
 	server.HandleFunc("POST /signup", controller.Signup)
 	server.HandleFunc("GET /refresh", controller.HndelRefreshToken)
@@ -31,7 +31,7 @@ func main() {
 	server.HandleFunc("GET /checkuser/", controller.CheckUniqueUserName)
 	server.HandleFunc("POST /upload", controller.SetUserData)
 	server.HandleFunc("POST /setuserdata", controller.SetUserData)
-	server.HandleFunc("GET /profile", controller.GetProfile)
+	server.HandleFunc("GET /profile/{username}", controller.GetProfile)
 	server.HandleFunc("POST /updateprofile", controller.UpdateProfile)
 	server.Handle("/", http.FileServer(http.Dir("../Frontend/dist")))
 
