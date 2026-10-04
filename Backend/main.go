@@ -21,7 +21,7 @@ func main() {
 	server := http.NewServeMux()
 	Port := os.Getenv("PORT")
 	fmt.Println(Port)
-	server.HandleFunc("/ws")
+	// server.HandleFunc("/ws")
 	server.HandleFunc("POST /login", controller.Login)
 	server.HandleFunc("POST /signup", controller.Signup)
 	server.HandleFunc("GET /refresh", controller.HndelRefreshToken)

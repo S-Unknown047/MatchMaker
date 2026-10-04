@@ -182,3 +182,4 @@ func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		"data":  "User data set successfully",
 	})
 }
+

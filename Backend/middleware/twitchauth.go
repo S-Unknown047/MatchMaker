@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -61,62 +62,68 @@ func TwitchAuth() error {
 	return nil
 }
 
-func GetGames(page string) []byte {
-	if data.AccessToken == "" || (data.TokenExpiry) < time.Now().Unix() {
-		if err := TwitchAuth(); err != nil {
-			fmt.Println("Error in TwitchAuth:", err)
-			return nil
-		}
-	}
+// as i need to make sure the games is fixed so i just store 50 games in the db for now so that i
+// create chat for each games
 
-	url := "https://api.igdb.com/v4/games"
-	body := `
-             fields name, cover.image_id, cover.url;
-             sort rating desc;
-             where rating_count > 100 & version_parent = null;
-             limit 20;`
+// func GetGames(page string) []byte {
+// 	if data.AccessToken == "" || (data.TokenExpiry) < time.Now().Unix() {
+// 		if err := TwitchAuth(); err != nil {
+// 			fmt.Println("Error in TwitchAuth:", err)
+// 			return nil
+// 		}
+// 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(body)))
+// 	url := "https://api.igdb.com/v4/games"
+// 	body := `
+//              fields name, genres.name,cover.image_id, cover.url;
+//              sort rating desc;
+//              where rating_count > 100 & version_parent = null;
+//              limit 50;`
 
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
+// 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(body)))
 
-	clientID := os.Getenv("TWITCH_CLIENT_ID")
-	acessToken := data.AccessToken
-	fmt.Println("acesstoken", acessToken)
-	req.Header.Add("Client-ID", clientID)
-	req.Header.Add("Authorization", "Bearer "+acessToken)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return nil
+// 	}
 
-	client := &http.Client{Timeout: time.Second * 4}
+// 	clientID := os.Getenv("TWITCH_CLIENT_ID")
+// 	acessToken := data.AccessToken
+// 	fmt.Println("acesstoken", acessToken)
+// 	req.Header.Add("Client-ID", clientID)
+// 	req.Header.Add("Authorization", "Bearer "+acessToken)
 
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	defer res.Body.Close()
+// 	client := &http.Client{Timeout: time.Second * 4}
 
-	if res.StatusCode != http.StatusOK {
-		resBody, _ := io.ReadAll(res.Body)
-		fmt.Printf("IGDB API returned status %s: %s\n", res.Status, string(resBody))
-		return nil
-	}
+// 	res, err := client.Do(req)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return nil
+// 	}
+// 	defer res.Body.Close()
 
-	read, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
+// 	if res.StatusCode != http.StatusOK {
+// 		resBody, _ := io.ReadAll(res.Body)
+// 		fmt.Printf("IGDB API returned status %s: %s\n", res.Status, string(resBody))
+// 		return nil
+// 	}
 
-	//json.Unmarshal(read, &data)
-	fmt.Println(string(read))
+// 	read, err := io.ReadAll(res.Body)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return nil
+// 	}
 
-	return read
-}
+// 	//json.Unmarshal(read, &data)
+// 	fmt.Println(string(read))
+
+// 	return read
+// }
 
 func SearchGame(gameName string) []byte {
+	cleanedName := strings.Trim(strings.TrimSpace(gameName), "\"")
+	cleanedName = strings.ReplaceAll(cleanedName, `"`, `\"`)
+
 	if data.AccessToken == "" || (data.TokenExpiry) < time.Now().Unix() {
 		if err := TwitchAuth(); err != nil {
 			fmt.Println("Error in TwitchAuth:", err)
@@ -126,7 +133,7 @@ func SearchGame(gameName string) []byte {
 
 	url := "https://api.igdb.com/v4/games"
 
-	body := `fields name, cover.url; search "` + gameName + `"; limit 10;`
+	body := fmt.Sprintf(`search "%s"; fields name, genres.name, cover.url, cover.image_id; limit 10;`, cleanedName)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(body)))
 

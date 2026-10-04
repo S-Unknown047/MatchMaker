@@ -36,7 +36,28 @@ type UserProfile struct {
 }
 
 type MsgType struct {
-	To      string    `json:"to"`
-	Message string    `json:"message"`
-	Created time.Time `json:"created"`
+	channel_id string    `json:"channel_id"`
+	Message    string    `json:"message"`
+	Created    time.Time `json:"created"`
+}
+
+type Event struct {
+	MsgType MsgType `json:"msg_type"`
+}
+type ChatReceived struct {
+}
+
+type GameCover struct {
+	ID      int    `json:"id"`
+	ImageID string `json:"image_id"`
+	URL     string `json:"url"`
+}
+
+type Game struct {
+	ID         int       `json:"id"`
+	Name       string    `json:"name"`
+	Cover      GameCover `json:"cover"`
+	Categories []string  `json:"categories"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }

@@ -118,3 +118,33 @@ func UpdateUserProfile(data *model.UserProfile) error {
 	}
 	return nil
 }
+
+func AddGame(game model.Game) error {
+	query := `INSERT INTO games (id, name, cover_id, cover_image_id, cover_url, categories)
+	          VALUES ($1, $2, $3, $4, $5, $6)
+	          ON CONFLICT (id) DO UPDATE SET
+	          name = EXCLUDED.name, cover_id = EXCLUDED.cover_id, cover_image_id = EXCLUDED.cover_image_id,
+	          cover_url = EXCLUDED.cover_url, categories = EXCLUDED.categories, updated_at = CURRENT_TIMESTAMP`
+	_, err := Conn.Exec(Ctx, query, game.ID, game.Name, game.Cover.ID, game.Cover.ImageID, game.Cover.URL, game.Categories)
+	return err
+}
+
+func GetAllGames() ([]model.Game, error) {
+	query := `SELECT id, name, cover_id, cover_image_id, cover_url, categories, created_at, updated_at FROM games ORDER BY id ASC`
+	rows, err := Conn.Query(Ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var games []model.Game
+	for rows.Next() {
+		var g model.Game
+		err := rows.Scan(&g.ID, &g.Name, &g.Cover.ID, &g.Cover.ImageID, &g.Cover.URL, &g.Categories, &g.CreatedAt, &g.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		games = append(games, g)
+	}
+	return games, nil
+}

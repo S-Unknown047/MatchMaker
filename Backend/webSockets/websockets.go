@@ -2,6 +2,7 @@ package webSockets
 
 import (
 	"encoding/json"
+	"matchMaker/model"
 	"net/http"
 	"sync"
 
@@ -15,6 +16,7 @@ var (
 	}
 )
 
+type EventHandler func(event model.Event, c *Client) error
 type Manager struct {
 	clients ClientList
 	sync.RWMutex
@@ -23,6 +25,7 @@ type Manager struct {
 func NewManager() *Manager {
 	m := &Manager{
 		clients: make(ClientList),
+		// handlers: make(map[string]EventHandler),
 	}
 
 	return m
@@ -39,7 +42,7 @@ func (m *Manager) Init(w http.ResponseWriter, r *http.Request) {
 
 	client := NewClient(conn, m)
 	m.addClient(client)
-	go client.readMessage()
+	go client.ReadMessage()
 }
 
 func (m *Manager) addClient(client *Client) *Manager {
