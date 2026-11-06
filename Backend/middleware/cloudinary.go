@@ -26,6 +26,9 @@ func CreateInstance() {
 }
 
 func UploadImage(file []byte) (string, string) {
+	if cld == nil || len(file) == 0 {
+		return "", ""
+	}
 	uploadResult, err := cld.Upload.Upload(context.Background(), bytes.NewReader(file), uploader.UploadParams{
 		ResourceType: "image",
 		Folder:       "matchmaker",

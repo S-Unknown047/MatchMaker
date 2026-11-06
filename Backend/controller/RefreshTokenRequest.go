@@ -78,11 +78,20 @@ func HndelRefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	profile, err := db.GetUserProfileByEmail(user.Email)
+	hasProfile := (err == nil)
+	var userName string
+	if hasProfile {
+		userName = profile.UserName
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"accessToken": accessToken,
 		"roles":       user.Roles,
 		"email":       user.Email,
+		"profile":     hasProfile,
+		"username":    userName,
 	})
 }

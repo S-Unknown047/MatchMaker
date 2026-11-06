@@ -13,6 +13,9 @@ var (
 	webSocketUpgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
 	}
 )
 
@@ -25,7 +28,6 @@ type Manager struct {
 func NewManager() *Manager {
 	m := &Manager{
 		clients: make(ClientList),
-		// handlers: make(map[string]EventHandler),
 	}
 
 	return m
@@ -43,12 +45,13 @@ func (m *Manager) Init(w http.ResponseWriter, r *http.Request) {
 	client := NewClient(conn, m)
 	m.addClient(client)
 	go client.ReadMessage()
+	go client.writeMessage()
 }
 
-func (m *Manager) addClient(client *Client) *Manager {
-	return &Manager{
-		clients: make(ClientList),
-	}
+func (m *Manager) addClient(client *Client) {
+	m.Lock()
+	defer m.Unlock()
+	m.clients[client] = true
 }
 
 func (m *Manager) removeClient(client *Client) {

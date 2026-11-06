@@ -5,8 +5,8 @@ import "time"
 type User struct {
 	Email        string    `json:"email"`
 	Password     string    `json:"password"`
-	CreatedAt    time.Time `json:created_at`
-	UpdatedAt    time.Time `json:updated_at`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 	RefreshToken string    `json:"refresh_token"`
 	Roles        []string  `json:"roles"`
 }
@@ -36,9 +36,9 @@ type UserProfile struct {
 }
 
 type MsgType struct {
-	channel_id string    `json:"channel_id"`
-	Message    string    `json:"message"`
-	Created    time.Time `json:"created"`
+	ChannelID string    `json:"channel_id"`
+	Message   string    `json:"message"`
+	Created   time.Time `json:"created"`
 }
 
 type Event struct {

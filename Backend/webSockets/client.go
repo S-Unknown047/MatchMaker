@@ -27,7 +27,7 @@ func NewClient(connection *websocket.Conn, manager *Manager) *Client {
 	return &Client{
 		connection: connection,
 		manager:    manager,
-		buffer:     make(chan []byte),
+		buffer:     make(chan []byte, 256),
 	}
 }
 
@@ -68,8 +68,10 @@ func (c *Client) ReadMessage() {
 }
 
 func (c *Client) writeMessage() {
+	ticker := time.NewTicker(pingPeriod)
 	defer func() {
-
+		ticker.Stop()
+		c.connection.Close()
 	}()
 
 	for {
@@ -80,22 +82,21 @@ func (c *Client) writeMessage() {
 				return
 			}
 
-			data, err := json.Marshal(message)
-			if err != nil {
-				log.Println(err)
+			if err := c.connection.WriteMessage(websocket.TextMessage, message); err != nil {
+				log.Println("write error:", err)
+				return
 			}
-
-			if err := c.connection.WriteMessage(websocket.TextMessage, data); err != nil {
-				log.Println(err)
+		case <-ticker.C:
+			c.connection.SetWriteDeadline(time.Now().Add(10 * time.Second))
+			if err := c.connection.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
 			}
-
 		}
 	}
-
 }
 
 func (c *Client) WriteMessage(message []byte) {
-
+	c.buffer <- message
 }
 
 func (c *Client) PongHandler(pong string) error {

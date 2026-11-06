@@ -84,10 +84,20 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, cookie)
+	profile, err := db.GetUserProfileByEmail(user.Email)
+	hasProfile := (err == nil)
+	var userName string
+	if hasProfile {
+		userName = profile.UserName
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"accessToken": acessTokenKey,
 		"roles":       data.Roles,
+		"profile":     hasProfile,
+		"username":    userName,
+		"email":       user.Email,
 	})
 }

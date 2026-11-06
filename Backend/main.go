@@ -18,23 +18,38 @@ func init() {
 }
 
 func main() {
-	server := http.NewServeMux()
 	Port := os.Getenv("PORT")
-	fmt.Println(Port)
-	// server.HandleFunc("/ws")
-	server.HandleFunc("POST /login", controller.Login)
-	server.HandleFunc("POST /signup", controller.Signup)
-	server.HandleFunc("GET /refresh", controller.HndelRefreshToken)
-	server.HandleFunc("GET /games", controller.GetGames)
-	server.HandleFunc("GET /searchgame", controller.SearchGame)
-	server.HandleFunc("GET /checkuser/{name}", controller.CheckUniqueUserName)
-	server.HandleFunc("GET /checkuser/", controller.CheckUniqueUserName)
-	server.HandleFunc("POST /upload", controller.SetUserData)
-	server.HandleFunc("POST /setuserdata", controller.SetUserData)
-	server.HandleFunc("GET /profile/{username}", controller.GetProfile)
-	server.HandleFunc("POST /updateprofile", controller.UpdateProfile)
-	server.Handle("/", http.FileServer(http.Dir("../Frontend/dist")))
+	if Port == "" {
+		Port = "8080"
+	}
+	fmt.Println("Server running on port:", Port)
 
-	handler := middleware.EnableCORS(server)
+	// Protected routes that require a valid JWT
+	protectedMux := http.NewServeMux()
+	protectedMux.HandleFunc("GET /games", controller.GetGames)
+	protectedMux.HandleFunc("GET /searchgame", controller.SearchGame)
+	protectedMux.HandleFunc("GET /getgamebyid", controller.GetGameByID)
+	protectedMux.HandleFunc("GET /getgamebyid/{id}", controller.GetGameByID)
+	protectedMux.HandleFunc("GET /checkuser/{name}", controller.CheckUniqueUserName)
+	protectedMux.HandleFunc("GET /checkuser/", controller.CheckUniqueUserName)
+	protectedMux.HandleFunc("GET /checkuser", controller.CheckUniqueUserName)
+	protectedMux.HandleFunc("POST /upload", controller.SetUserData)
+	protectedMux.HandleFunc("POST /setuserdata", controller.SetUserData)
+	protectedMux.HandleFunc("GET /profile/{username}", controller.GetProfile)
+	protectedMux.HandleFunc("POST /updateprofile", controller.UpdateProfile)
+
+	// Root mux
+	rootMux := http.NewServeMux()
+
+	// Public routes (no JWT required)
+	rootMux.HandleFunc("POST /login", controller.Login)
+	rootMux.HandleFunc("POST /signup", controller.Signup)
+	rootMux.HandleFunc("GET /refresh", controller.HndelRefreshToken)
+
+	// Protected routes wrapped in JWT verification
+	rootMux.Handle("/", middleware.JwtVerify(protectedMux))
+
+	// CORS middleware as the outermost wrapper so OPTIONS requests and all endpoints have CORS
+	handler := middleware.EnableCORS(rootMux)
 	http.ListenAndServe(":"+Port, handler)
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -15,7 +16,7 @@ func JwtVerify(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		AuthToken := r.Header.Get("authorization")
 
-		if len(AuthToken) > 7 && AuthToken[:7] == "Bearer " {
+		if len(AuthToken) > 7 && strings.EqualFold(AuthToken[:7], "Bearer ") {
 			AuthToken = AuthToken[7:]
 		}
 
@@ -56,12 +57,25 @@ func JwtVerify(next http.Handler) http.Handler {
 				return
 			}
 
-			email := claims["email"].(string)
+			email, ok := claims["email"].(string)
+			if !ok {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
+				return
+			}
 			ctx := context.WithValue(r.Context(), "email", email)
 
 			ctxReq := r.WithContext(ctx)
 
 			next.ServeHTTP(w, ctxReq)
+			return
 		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Unauthorized",
+		})
 	})
 }

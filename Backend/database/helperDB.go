@@ -36,7 +36,7 @@ func GetUser(Email string) (model.User, error) {
 }
 
 func UpdatePassword(user model.User) error {
-	query := `UPDATE users SET password = $1, update_at = $2 WHERE email = $3`
+	query := `UPDATE users SET password = $1, updated_at = $2 WHERE email = $3`
 
 	if _, err := Conn.Exec(Ctx, query, user.Password, user.UpdatedAt, user.Email); err != nil {
 		return err
@@ -53,14 +53,15 @@ func SetRefreshToken(refreshToken string, user *model.User) error {
 }
 
 func GetRefreshToken(refreshToken string) (model.User, error) {
-	query := `SELECT email, password, created_at, updated_at, refresh_token FROM users WHERE refresh_token = $1`
+	query := `SELECT email, password, created_at, updated_at, refresh_token, roles FROM users WHERE refresh_token = $1`
 	var data model.User
 	if err := Conn.QueryRow(Ctx, query, refreshToken).Scan(
 		&data.Email,
 		&data.Password,
 		&data.CreatedAt,
 		&data.UpdatedAt,
-		&data.RefreshToken); err != nil {
+		&data.RefreshToken,
+		&data.Roles); err != nil {
 		return data, err
 	}
 	return data, nil
@@ -75,9 +76,30 @@ func SetUserData(data *model.UserProfile) error {
 }
 
 func GetUserData(userName string) (model.UserProfile, error) {
-	query := `SELECT * FROM user_info WHERE user_name = $1`
+	query := `SELECT email, user_name, age, gender, level, profile_picture_url, profile_picture_id, playing_style, games, created_at, updated_at FROM user_info WHERE user_name = $1`
 	var user model.UserProfile
 	if err := Conn.QueryRow(Ctx, query, userName).Scan(
+		&user.Email,
+		&user.UserName,
+		&user.Age,
+		&user.Gender,
+		&user.Level,
+		&user.ProfilePictureUrl,
+		&user.ProfilePictureId,
+		&user.PlayingStyle,
+		&user.Games,
+		&user.CreatedAt,
+		&user.UpdatedAt); err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func GetUserProfileByEmail(email string) (model.UserProfile, error) {
+	query := `SELECT email, user_name, age, gender, level, profile_picture_url, profile_picture_id, playing_style, games, created_at, updated_at FROM user_info WHERE email = $1`
+	var user model.UserProfile
+	if err := Conn.QueryRow(Ctx, query, email).Scan(
 		&user.Email,
 		&user.UserName,
 		&user.Age,
@@ -129,15 +151,18 @@ func AddGame(game model.Game) error {
 	return err
 }
 
-func GetAllGames() ([]model.Game, error) {
-	query := `SELECT id, name, cover_id, cover_image_id, cover_url, categories, created_at, updated_at FROM games ORDER BY id ASC`
-	rows, err := Conn.Query(Ctx, query)
+func GetAllGames(page int) ([]model.Game, error) {
+	if page < 1 {
+		page = 1
+	}
+	offset := (page - 1) * 20
+	query := `SELECT id, name, cover_id, cover_image_id, cover_url, categories, created_at, updated_at FROM games ORDER BY id ASC limit 20 offset $1`
+	rows, err := Conn.Query(Ctx, query, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
-	var games []model.Game
+	games := []model.Game{}
 	for rows.Next() {
 		var g model.Game
 		err := rows.Scan(&g.ID, &g.Name, &g.Cover.ID, &g.Cover.ImageID, &g.Cover.URL, &g.Categories, &g.CreatedAt, &g.UpdatedAt)
@@ -145,6 +170,9 @@ func GetAllGames() ([]model.Game, error) {
 			return nil, err
 		}
 		games = append(games, g)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	return games, nil
 }

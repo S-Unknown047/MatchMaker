@@ -6,13 +6,25 @@ import (
 	"net/http"
 )
 
-func GetGameByID(w http.ResponseWriter, r http.Request) {
-	var id string
+func GetGameByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewDecoder(r.Body).Decode(&id); err != nil {
+
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		id = r.PathValue("id")
+	}
+	if id == "" && r.Body != nil {
+		var bodyId string
+		if err := json.NewDecoder(r.Body).Decode(&bodyId); err == nil {
+			id = bodyId
+		}
+	}
+
+	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{
-			"error": err.Error()})
+			"error": "id parameter is required",
+		})
 		return
 	}
 
@@ -21,7 +33,8 @@ func GetGameByID(w http.ResponseWriter, r http.Request) {
 	if response == nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{
-			"error": "No Games found"})
+			"error": "No Games found",
+		})
 		return
 	}
 
